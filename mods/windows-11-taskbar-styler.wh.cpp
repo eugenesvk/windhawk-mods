@@ -172,6 +172,34 @@ struct Theme {
 
 // clang-format off
 
+const Theme g_themeTest = {{
+  // Transparent taskbar
+  ThemeTargetStyles{L"Taskbar.TaskbarFrame > Grid#RootGrid > Taskbar.TaskbarBackground > Grid > Rectangle#BackgroundFill",{
+    L"Fill=Transparent"}},
+  ThemeTargetStyles{L"Rectangle#BackgroundStroke",{
+    L"Fill=Transparent"}},
+
+  // Indicators: on top
+  ThemeTargetStyles{L"Taskbar.TaskListLabeledButtonPanel@RunningIndicatorStates > Rectangle#RunningIndicator",{
+    L"Fill=#8f8f8f",L"Fill@ActiveRunningIndicator=#3eb9f9",
+    L"Height=2",L"Width=6",L"Width@ActiveRunningIndicator=30",
+  }},
+  ThemeTargetStyles{L"Rectangle#RunningIndicator"                  	,{L"VerticalAlignment=0"}},
+  ThemeTargetStyles{L"Border#ProgressBarRoot"                      	,{L"VerticalAlignment=0"}},
+  ThemeTargetStyles{L"Rectangle#DeterminateProgressBarIndicator"   	,{L"VerticalAlignment=0"}},
+  ThemeTargetStyles{L"Rectangle#IndeterminateProgressBarIndicator" 	,{L"VerticalAlignment=0"}},
+  ThemeTargetStyles{L"Rectangle#IndeterminateProgressBarIndicator2"	,{L"VerticalAlignment=0"}},
+
+  // Start button: hidden (use the ∞ angle to use it instead)
+  ThemeTargetStyles{L"Taskbar.ExperienceToggleButton#LaunchListButton[AutomationProperties.AutomationId=StartButton", {
+    L"Visibility=Collapsed",
+  }},
+
+  // ThemeTargetStyles{L"target", {
+  //   L"Style=Value",
+  // }},
+}};
+
 const Theme g_themeWinXP = {{
     ThemeTargetStyles{L"Rectangle#BackgroundStroke", {
         L"Fill:=<LinearGradientBrush StartPoint=\"0.5,0\" EndPoint=\"0.5,1\"> <GradientStop Color=\"#3168d5\" Offset=\"0.0\" /> <GradientStop Color=\"#4993E6\" Offset=\"0.1\" /> <GradientStop Color=\"#2157D7\" Offset=\"0.35\" /> <GradientStop Color=\"#2663E0\" Offset=\"0.8\" /> <GradientStop Color=\"#1941A5\" Offset=\"1.0\" /></LinearGradientBrush>",
