@@ -11,75 +11,36 @@
 // @architecture    x86-64
 // @compilerOptions -D__USE_MINGW_ANSI_STDIO=0 -lole32 -loleaut32 -lruntimeobject -lversion -lwininet
 // ==/WindhawkMod==
-
-// Source code is published under The GNU General Public License v3.0.
-//
-// For bug reports and feature requests, please open an issue here:
-// https://github.com/ramensoftware/windhawk-mods/issues
-//
-// For pull requests, development takes place here:
-// https://github.com/m417z/my-windhawk-mods
-
+// The GNU General Public License v3.0
+// FRs/bugs: github.com/ramensoftware/windhawk-mods/issues
+// PRs     : github.com/m417z/my-windhawk-mods
 // ==WindhawkModReadme==
 /*
 # Taskbar Clock Customization
-
-Customize the taskbar clock: define a custom date/time format, add a news feed,
-customize fonts and colors, and more.
-
+Customize the taskbar clock: define a custom date/time format, add a news feed, customize fonts and colors, and more.
 Only Windows 10 64-bit and Windows 11 are supported.
-
-**Note:** To customize the old taskbar on Windows 11 (if using ExplorerPatcher
-or a similar tool), enable the relevant option in the mod's settings.
-
+**Note:** To customize the old taskbar on Windows 11 (if using ExplorerPatcher or a similar tool), enable the relevant option in the mod's settings.
 ![Screenshot](https://i.imgur.com/gM9kbH5.png)
-
 ## Available patterns
-
-Supported fields - top line, bottom line, middle line (Windows 10 only), tooltip
-extra line - can be configured with text that contains patterns. The following
-patterns can be used:
-
+Supported fields - top line, bottom line, middle line (Windows 10 only), tooltip extra line - can be configured with text that contains patterns. The following patterns can be used:
 * `%time%` - the time as configured by the time format in settings.
-  * `%time<n>%` - additional time formats which can be specified by separating
-    the time format string with `;`. `<n>` is the additional time format number,
-    starting with 2.
-  * `%time_tz<n>%` - the time with a custom time zone. `<n>` is the time zone
-    number in the list of time zones configured in settings.
+  * `%time<n>%` - additional time formats which can be specified by separating the time format string with `;`. `<n>` is the additional time format number, starting with 2.
+  * `%time_tz<n>%` - the time with a custom time zone. `<n>` is the time zone number in the list of time zones configured in settings.
 * `%date%` - the date as configured by the date format in settings.
-  * `%date<n>%` - additional date formats which can be specified by separating
-    the date format string with `;`. `<n>` is the additional date format number,
-    starting with 2.
-  * `%date_tz<n>%` - the date with a custom time zone. `<n>` is the time zone
-    number in the list of time zones configured in settings.
+  * `%date<n>%` - additional date formats which can be specified by separating the date format string with `;`. `<n>` is the additional date format number, starting with 2.
+  * `%date_tz<n>%` - the date with a custom time zone. `<n>` is the time zone number in the list of time zones configured in settings.
 * `%weekday%` - the week day as configured by the week day format in settings.
-  * `%weekday<n>%` - additional week day formats which can be specified by
-    separating the week day format string with `;`. `<n>` is the additional week
-    day format number, starting with 2.
-  * `%weekday_tz<n>%` - the week day with a custom time zone. `<n>` is the time
-    zone number in the list of time zones configured in settings.
-* `%weekday_num%` - the week day number according to the [first day of
-   week](https://superuser.com/q/61002) system configuration. For example, if
-   first day of week is Sunday, then the week day number is 1 for Sunday, 2 for
-   Monday, ..., 7 for Saturday.
-* `%weeknum%` - the week number, calculated as following: The week containing 1
-  January is defined as week 1 of the year. Subsequent weeks start on first day
-  of week according to the system configuration.
-* `%weeknum_iso%` - the [ISO week
-  number](https://en.wikipedia.org/wiki/ISO_week_date).
+  * `%weekday<n>%` - additional week day formats which can be specified by separating the week day format string with `;`. `<n>` is the additional week day format number, starting with 2.
+  * `%weekday_tz<n>%` - the week day with a custom time zone. `<n>` is the time zone number in the list of time zones configured in settings.
+* `%weekday_num%` - the week day number according to the [first day of week](https://superuser.com/q/61002) system configuration. For example, if first day of week is Sunday, then the week day number is 1 for Sunday, 2 for Monday, ..., 7 for Saturday.
+* `%weeknum%` - the week number, calculated as following: The week containing 1 January is defined as week 1 of the year. Subsequent weeks start on first day of week according to the system configuration.
+* `%weeknum_iso%` - the [ISO week number](https://en.wikipedia.org/wiki/ISO_week_date).
 * `%dayofyear%` - the day of year starting from January 1st.
 * `%timezone%` - the time zone in ISO 8601 format.
-* `%web<n>%` - the web contents as configured in settings, truncated with
-  ellipsis, where `<n>` is the web contents number.
-* `%web<n>_full%` - the full web contents as configured in settings, where `<n>`
-  is the web contents number.
 * `%newline%` - a newline.
 
 ## Text styles
-
-For Windows 11 version 22H2 and newer, the mod allows to change the clock text
-styles, such as the font color and size.
-
+For Windows 11 version 22H2 and newer, the mod allows to change the clock text styles, such as the font color and size.
 ![Screenshot](https://i.imgur.com/3JiXwjT.png)
 */
 // ==/WindhawkModReadme==
@@ -92,22 +53,16 @@ styles, such as the font color and size.
     hh':'mm':'ss tt
   $name: Time format
   $description: >-
-    Leave empty for the default format. For syntax refer to the following page:
-
-    https://docs.microsoft.com/en-us/windows/win32/api/datetimeapi/nf-datetimeapi-gettimeformatex#remarks
+    Empty=default. Syntax docs.microsoft.com/en-us/windows/win32/api/datetimeapi/nf-datetimeapi-gettimeformatex#remarks
 - DateFormat: >-
     ddd',' MMM dd yyyy
   $name: Date format
   $description: >-
-    Leave empty for the default format. For syntax refer to the following page:
-
-    https://docs.microsoft.com/en-us/windows/win32/intl/day--month--year--and-era-format-pictures
+    Empty=default. Syntax docs.microsoft.com/en-us/windows/win32/intl/day--month--year--and-era-format-pictures
 - WeekdayFormat: dddd
   $name: Week day format
   $description: >-
-    Leave empty for the default format. For syntax refer to the following page:
-
-    https://docs.microsoft.com/en-us/windows/win32/intl/day--month--year--and-era-format-pictures
+    Empty=default. custom=see WeekdayFormatCustom, otherwise syntax docs.microsoft.com/en-us/windows/win32/intl/day--month--year--and-era-format-pictures
 - TopLine: '%date% | %time%'
   $name: Top line
   $description: >-
