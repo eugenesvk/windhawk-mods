@@ -28,6 +28,11 @@ BottomDensy:
   - no start button (use ∞ corner dimension)
   - tiny inactive running indicator since most of the icons will have it
   - change active running indicator color to match your borderless app background to make an icon "extend" into the app
+BottomDensyNoInd: BottomDensy, but 2px smaller!
+  - top padding used for indicators removed
+    - active running indicator remains, but eats into the icon size instead
+    - inactive running indicator removed since almost all icons in the taskbar are running
+    - non running apps are indicated via a smaller icon instead
 [![WinXP](https://raw.githubusercontent.com/ramensoftware/windows-11-taskbar-styling-guide/main/Themes/WinXP/screenshot-small.png)
 \
 WinXP](https://github.com/ramensoftware/windows-11-taskbar-styling-guide/blob/main/Themes/WinXP/README.md)
@@ -125,7 +130,7 @@ The VisualTreeWatcher implementation is based on the [ExplorerTAP](https://githu
 
 // ==WindhawkModSettings==
 /*
-- theme: "BottomDensy"
+- theme: "BottomDensyNoInd"
   $name: Theme
   $description: >-
     Themes are collections of styles. For details about the themes below, or for
@@ -134,6 +139,7 @@ The VisualTreeWatcher implementation is based on the [ExplorerTAP](https://githu
   $options:
   - "": None
   - BottomDensy: BottomDensy
+  - BottomDensyNoInd: BottomDensyNoInd
   - WinXP: WinXP
   - Bubbles: Bubbles
   - TranslucentTaskbar: TranslucentTaskbar
@@ -198,6 +204,48 @@ const Theme g_themeBottomDensy = {{
   ThemeTargetStyles{L"Rectangle#DeterminateProgressBarIndicator"   	,{L"VerticalAlignment=0"}},
   ThemeTargetStyles{L"Rectangle#IndeterminateProgressBarIndicator" 	,{L"VerticalAlignment=0"}},
   ThemeTargetStyles{L"Rectangle#IndeterminateProgressBarIndicator2"	,{L"VerticalAlignment=0"}},
+  // Icons @ bottom, no padding (adjust taskbar height to remove empty top)
+  ThemeTargetStyles{L"Taskbar.TaskListLabeledButtonPanel", {
+    L"Padding=2,0,2,0", //≝2,4,2,4
+    L"VerticalAlignment=2", //≝0
+  }},
+  // VerticalAlignment relative to parent's layout slot: 0=Top 1=Center 2=Bottom 3=Stretch (fill)
+
+  // Start button: hidden (use the ∞ angle to use it instead)
+  ThemeTargetStyles{L"Taskbar.ExperienceToggleButton#LaunchListButton[AutomationProperties.AutomationId=StartButton]", {
+    L"Visibility=Collapsed",
+  }},
+}};
+
+const Theme g_themeBottomDensyNoInd = {{
+  // Transparent taskbar
+  ThemeTargetStyles{L"Taskbar.TaskbarFrame > Grid#RootGrid > Taskbar.TaskbarBackground > Grid > Rectangle#BackgroundFill",{
+    L"Fill=Transparent"}},
+  ThemeTargetStyles{L"Rectangle#BackgroundStroke",{
+    L"Fill=Transparent"}},
+
+  // Indicators: non inactive (mark the few not running instead), active ones "eat" into the icon to otherwise remove any space between the top of the icon and the taskbar edge
+  ThemeTargetStyles{L"Taskbar.TaskListLabeledButtonPanel@RunningIndicatorStates > Rectangle#RunningIndicator",{
+    L"Fill=#8f8f8f",L"Fill@ActiveRunningIndicator=#fef9f0",
+    L"Height=0",L"Width=0", L"Margin=0,0,0,0",
+    L"Height@ActiveRunningIndicator=2",L"Width@ActiveRunningIndicator=32",
+    L"Margin@ActiveRunningIndicator=0,-2,0,0",
+  }},
+  ThemeTargetStyles{L"Rectangle#RunningIndicator"                  	,{L"VerticalAlignment=0"}},
+  ThemeTargetStyles{L"Border#ProgressBarRoot"                      	,{L"VerticalAlignment=0"}},
+  ThemeTargetStyles{L"Rectangle#DeterminateProgressBarIndicator"   	,{L"VerticalAlignment=0"}},
+  ThemeTargetStyles{L"Rectangle#IndeterminateProgressBarIndicator" 	,{L"VerticalAlignment=0"}},
+  ThemeTargetStyles{L"Rectangle#IndeterminateProgressBarIndicator2"	,{L"VerticalAlignment=0"}},
+  // Icon indicators:
+  ThemeTargetStyles{L"Taskbar.TaskListLabeledButtonPanel@RunningIndicatorStates > Image#Icon", {
+    // Active running: slightly smaller icon to fit the active indicator
+    L"Width@ActiveRunningIndicator=30",
+    L"Height@ActiveRunningIndicator=30",
+    // Non-running: smaller icons @ bottom
+    L"Width@NoRunningIndicator=24",
+    L"Height@NoRunningIndicator=24",
+    L"Margin@NoRunningIndicator=0,8,0,0",
+  }},
   // Icons @ bottom, no padding (adjust taskbar height to remove empty top)
   ThemeTargetStyles{L"Taskbar.TaskListLabeledButtonPanel", {
     L"Padding=2,0,2,0", //≝2,4,2,4
@@ -2517,6 +2565,8 @@ void ProcessAllStylesFromSettings() {
         theme = &g_themeWinXP;
     } else if (wcscmp(themeName, L"BottomDensy") == 0) {
         theme = &g_themeBottomDensy;
+    } else if (wcscmp(themeName, L"BottomDensyNoInd") == 0) {
+        theme = &g_themeBottomDensyNoInd;
     } else if (wcscmp(themeName, L"Bubbles") == 0) {
         theme = &g_themeBubbles;
     } else if (wcscmp(themeName, L"TranslucentTaskbar") == 0) {
