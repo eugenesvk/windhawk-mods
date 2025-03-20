@@ -11,43 +11,24 @@
 // @architecture    x86-64
 // @compilerOptions -DWINVER=0x0A00 -lcomctl32 -lole32 -loleaut32 -lruntimeobject -lshcore -lwininet
 // ==/WindhawkMod==
-
-// Source code is published under The GNU General Public License v3.0.
-//
-// For bug reports and feature requests, please open an issue here:
-// https://github.com/ramensoftware/windhawk-mods/issues
-//
-// For pull requests, development takes place here:
-// https://github.com/m417z/my-windhawk-mods
-
+// The GNU General Public License v3.0
+// FRs/bugs: github.com/ramensoftware/windhawk-mods/issues
+// PRs     : github.com/m417z/my-windhawk-mods
 // ==WindhawkModReadme==
 /*
 # Taskbar height and icon size
-
-Control the taskbar height and icon size. Make the taskbar icons large and
-crisp, or small and compact.
-
+Control the taskbar height and icon size. Make the taskbar icons large and crisp, or small and compact.
 By default, the Windows 11 taskbar shows taskbar icons with the 24x24 size.
-Since icons in Windows are either 16x16 or 32x32, the 24x24 icons are downscaled
-versions of the 32x32 variants, which makes them blurry. This mod allows to
-change the size of icons, and so the original quality icons can be used, as well
-as any other icon size.
-
+Since icons in Windows are either 16x16 or 32x32, the 24x24 icons are downscaled versions of the 32x32 variants, which makes them blurry. This mod allows to change the size of icons, and so the original quality icons can be used, as well as any other icon size.
 ![Before screenshot](https://i.imgur.com/TLza5fp.png) \
 *Icon size: 24x24, taskbar height: 48 (Windows 11 default)*
-
 ![After screenshot, large icons](https://i.imgur.com/3b8h40F.png) \
 *Icon size: 32x32, taskbar height: 52*
-
 ![After screenshot, small icons](https://i.imgur.com/Xy04Zcu.png) \
 *Icon size: 16x16, taskbar height: 34*
-
 ![After screenshot, small and narrow icons](https://i.imgur.com/fsx8C56.png) \
 *Icon size: 16x16, taskbar height: 34, taskbar button width: 28*
-
-Only Windows 11 is supported. For older Windows versions check out [7+ Taskbar
-Tweaker](https://tweaker.ramensoftware.com/).
-
+Only Windows 11 is supported. For older Windows versions check out [7+ Taskbar Tweaker](https://tweaker.ramensoftware.com/).
 Also check out the **Taskbar tray icon spacing** mod.
 */
 // ==/WindhawkModReadme==
