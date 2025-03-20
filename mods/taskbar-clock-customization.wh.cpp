@@ -47,15 +47,15 @@ For Windows 11 version 22H2 and newer, the mod allows to change the clock text s
 
 // ==WindhawkModSettings==
 /*
-- ShowSeconds: true
+- ShowSeconds: false
   $name: Show seconds
 - TimeFormat: >-
-    hh':'mm':'ss tt
+    H':'mm
   $name: Time format
   $description: >-
     Empty=default. Syntax docs.microsoft.com/en-us/windows/win32/api/datetimeapi/nf-datetimeapi-gettimeformatex#remarks
 - DateFormat: >-
-    ddd',' MMM dd yyyy
+    d MMM
   $name: Date format
   $description: >-
     Empty=default. Syntax docs.microsoft.com/en-us/windows/win32/intl/day--month--year--and-era-format-pictures
@@ -68,15 +68,15 @@ For Windows 11 version 22H2 and newer, the mod allows to change the clock text s
   $description: >-
     Text to be shown on the first line. Set to "-" for the default value. Refer
     to the mod details for list of patterns that can be used.
-- BottomLine: '%web1%'
+- BottomLine: '%date%'
   $name: Bottom line
   $description: >-
     Only shown if the taskbar is large enough. Set to "-" for the default value.
-- MiddleLine: '%weekday%'
+- MiddleLine: '-'
   $name: Middle line (Windows 10 only)
   $description: >-
     Only shown if the taskbar is large enough. Set to "-" for the default value.
-- TooltipLine: '%web1_full%'
+- TooltipLine: '-'
   $name: Tooltip extra line
 - Width: 180
   $name: Clock width (Windows 10 only)
