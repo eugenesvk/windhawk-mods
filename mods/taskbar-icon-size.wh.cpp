@@ -38,15 +38,15 @@ Also check out the **Taskbar tray icon spacing** mod.
 - IconSize: 32
   $name: Icon size
   $description: >-
-    The size, in pixels, of icons on the taskbar (Windows 11 default: 24)
-- TaskbarHeight: 52
+    The size, in pixels, of icons on the taskbar (Windows 11 ≝24)
+- TaskbarHeight: 34
   $name: Taskbar height
   $description: >-
-    The height, in pixels, of the taskbar (Windows 11 default: 48)
-- TaskbarButtonWidth: 44
+    The height, in pixels, of the taskbar (Windows 11 ≝48)
+- TaskbarButtonWidth: 36
   $name: Taskbar button width
   $description: >-
-    The width, in pixels, of the taskbar buttons (Windows 11 default: 44)
+    The width, in pixels, of the taskbar buttons (Windows 11 ≝44)
 */
 // ==/WindhawkModSettings==
 
