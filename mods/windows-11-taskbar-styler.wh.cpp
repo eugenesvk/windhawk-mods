@@ -11,193 +11,108 @@
 // @architecture    x86-64
 // @compilerOptions -lcomctl32 -lole32 -loleaut32 -lruntimeobject -Wl,--export-all-symbols
 // ==/WindhawkMod==
-
-// Source code is published under The GNU General Public License v3.0.
-//
-// For bug reports and feature requests, please open an issue here:
-// https://github.com/ramensoftware/windhawk-mods/issues
-//
-// For pull requests, development takes place here:
-// https://github.com/m417z/my-windhawk-mods
-
+// The GNU General Public License v3.0
+// FRs/bugs: github.com/ramensoftware/windhawk-mods/issues
+// PRs     : github.com/m417z/my-windhawk-mods
 // ==WindhawkModReadme==
 /*
 # Windows 11 Taskbar Styler
-
 Customize the taskbar with themes contributed by others or create your own.
-
-Also check out the **Windows 11 Start Menu Styler**, **Windows 11 Notification
-Center Styler** mods.
-
+Also check out the **Windows 11 Start Menu Styler**, **Windows 11 Notification Center Styler** mods.
 ## Themes
-
-Themes are collections of styles. The following themes are integrated into the
-mod and can be selected in the settings:
-
+Themes are collections of styles. The following themes are integrated into the mod and can be selected in the settings:
 [![WinXP](https://raw.githubusercontent.com/ramensoftware/windows-11-taskbar-styling-guide/main/Themes/WinXP/screenshot-small.png)
 \
 WinXP](https://github.com/ramensoftware/windows-11-taskbar-styling-guide/blob/main/Themes/WinXP/README.md)
-
 [![Bubbles](https://raw.githubusercontent.com/ramensoftware/windows-11-taskbar-styling-guide/main/Themes/Bubbles/screenshot.png)
 \
 Bubbles](https://github.com/ramensoftware/windows-11-taskbar-styling-guide/blob/main/Themes/Bubbles/README.md)
-
 [![TranslucentTaskbar](https://raw.githubusercontent.com/ramensoftware/windows-11-taskbar-styling-guide/main/Themes/TranslucentTaskbar/screenshot.png)
 \
 TranslucentTaskbar](https://github.com/ramensoftware/windows-11-taskbar-styling-guide/blob/main/Themes/TranslucentTaskbar/README.md)
-
 [![Squircle](https://raw.githubusercontent.com/ramensoftware/windows-11-taskbar-styling-guide/main/Themes/Squircle/screenshot.png)
 \
 Squircle](https://github.com/ramensoftware/windows-11-taskbar-styling-guide/blob/main/Themes/Squircle/README.md)
-
 [![RosePine](https://raw.githubusercontent.com/ramensoftware/windows-11-taskbar-styling-guide/main/Themes/RosePine/screenshot.png)
 \
 RosePine](https://github.com/ramensoftware/windows-11-taskbar-styling-guide/blob/main/Themes/RosePine/README.md)
-
 [![DockLike](https://raw.githubusercontent.com/ramensoftware/windows-11-taskbar-styling-guide/main/Themes/DockLike/screenshot.png)
 \
 DockLike](https://github.com/ramensoftware/windows-11-taskbar-styling-guide/blob/main/Themes/DockLike/README.md)
-
 [![WinVista](https://raw.githubusercontent.com/ramensoftware/windows-11-taskbar-styling-guide/main/Themes/WinVista/screenshot.png)
 \
 WinVista](https://github.com/ramensoftware/windows-11-taskbar-styling-guide/blob/main/Themes/WinVista/README.md)
-
 [![CleanSlate](https://raw.githubusercontent.com/ramensoftware/windows-11-taskbar-styling-guide/main/Themes/CleanSlate/screenshot.png)
 \
 CleanSlate](https://github.com/ramensoftware/windows-11-taskbar-styling-guide/blob/main/Themes/CleanSlate/README.md)
-
 [![Lucent](https://raw.githubusercontent.com/ramensoftware/windows-11-taskbar-styling-guide/main/Themes/Lucent/screenshot.png)
 \
 Lucent](https://github.com/ramensoftware/windows-11-taskbar-styling-guide/blob/main/Themes/Lucent/README.md)
-
 [![21996Taskbar](https://raw.githubusercontent.com/ramensoftware/windows-11-taskbar-styling-guide/main/Themes/21996Taskbar/screenshot.png)
 \
 21996Taskbar](https://github.com/ramensoftware/windows-11-taskbar-styling-guide/blob/main/Themes/21996Taskbar/README.md)
 
-More themes can be found in the **Themes** section of [The Windows 11 taskbar
-styling
-guide](https://github.com/ramensoftware/windows-11-taskbar-styling-guide/blob/main/README.md#themes).
+More themes can be found in the **Themes** section of [The Windows 11 taskbar styling guide](https://github.com/ramensoftware/windows-11-taskbar-styling-guide/blob/main/README.md#themes).
 Contributions of new themes are welcome!
-
 ## Advanced styling
+Aside from themes, the settings have two sections: control styles and resource variables. Control styles allow to override styles, such as size and color, for the target elements. Resource variables allow to override predefined variables. For a more detailed explanation and examples, refer to the sections below.
 
-Aside from themes, the settings have two sections: control styles and resource
-variables. Control styles allow to override styles, such as size and color, for
-the target elements. Resource variables allow to override predefined variables.
-For a more detailed explanation and examples, refer to the sections below.
+The taskbar's XAML resources can help find out which elements and resource variables can be customized. To the best of my knowledge, there are no public tools that are able to decode the resource files of recent Windows versions, but here are XAML resources which were obtained via other means for your convenience: [TaskbarResources.xbf and SystemTrayResources.xbf](https://gist.github.com/m417z/ad0ab39351aca905f1d186b1f1c3d8c7).
 
-The taskbar's XAML resources can help find out which elements and resource
-variables can be customized. To the best of my knowledge, there are no public
-tools that are able to decode the resource files of recent Windows versions, but
-here are XAML resources which were obtained via other means for your
-convenience: [TaskbarResources.xbf and
-SystemTrayResources.xbf](https://gist.github.com/m417z/ad0ab39351aca905f1d186b1f1c3d8c7).
+The [UWPSpy](https://ramensoftware.com/uwpspy) tool can be used to inspect the taskbar's control elements in real time, and experiment with various styles.
 
-The [UWPSpy](https://ramensoftware.com/uwpspy) tool can be used to inspect the
-taskbar's control elements in real time, and experiment with various styles.
-
-For a collection of commonly requested taskbar styling customizations, check out
-[The Windows 11 taskbar styling
-guide](https://github.com/ramensoftware/windows-11-taskbar-styling-guide/blob/main/README.md).
+For a collection of commonly requested taskbar styling customizations, check out [The Windows 11 taskbar styling guide](https://github.com/ramensoftware/windows-11-taskbar-styling-guide/blob/main/README.md).
 
 ### Control styles
 
 Each entry has a target control and a list of styles.
 
-The target control is written as `Class` or `Class#Name`, i.e. the target
-control class name (the tag name in XAML resource files), such as
-`Taskbar.TaskListButton` or `Rectangle`, optionally followed by `#` and the
-target control's name (`x:Name` attribute in XAML resource files). The target
-control can also include:
-* Child control index, for example: `Class#Name[2]` will only match the relevant
-  control that's also the second child among all of its parent's child controls.
-* Control properties, for example:
-  `Class#Name[Property1=Value1][Property2=Value2]`.
-* Parent controls, separated by `>`, for example: `ParentClass#ParentName >
-  Class#Name`.
-* Visual state group name, for example: `Class#Name@VisualStateGroupName`. It
-  can be specified for the target control or for a parent control, but can be
-  specified only once per target. The visual state group can be used in styles
-  as specified below.
+The target control is written as `Class` or `Class#Name`, i.e. the target control class name (the tag name in XAML resource files), such as `Taskbar.TaskListButton` or `Rectangle`, optionally followed by `#` and the target control's name (`x:Name` attribute in XAML resource files). The target control can also include:
+* Child control index, for example: `Class#Name[2]` will only match the relevant control that's also the second child among all of its parent's child controls.
+* Control properties, for example: `Class#Name[Property1=Value1][Property2=Value2]`.
+* Parent controls, separated by `>`, for example: `ParentClass#ParentName > Class#Name`.
+* Visual state group name, for example: `Class#Name@VisualStateGroupName`. It can be specified for the target control or for a parent control, but can be specified only once per target. The visual state group can be used in styles as specified below.
 
-**Note**: The target is evaluated only once. If, for example, the index or the
-properties of a control change, the target conditions aren't evaluated again.
+**Note**: The target is evaluated only once. If, for example, the index or the properties of a control change, the target conditions aren't evaluated again.
 
-Each style is written as `Style=Value`, for example: `Height=5`. The `:=` syntax
-can be used to use XAML syntax, for example: `Fill:=<SolidColorBrush
-Color="Red"/>`. Specifying an empty value with the XAML syntax will clear the
-property value, for example: `Fill:=`. In addition, a visual state can be
-specified as following: `Style@VisualState=Value`, in which case the style will
-only apply when the visual state group specified in the target matches the
-specified visual state.
-
+Each style is written as `Style=Value`, for example: `Height=5`. The `:=` syntax can be used to use XAML syntax, for example: `Fill:=<SolidColorBrush Color="Red"/>`. Specifying an empty value with the XAML syntax will clear the property value, for example: `Fill:=`. In addition, a visual state can be specified as following: `Style@VisualState=Value`, in which case the style will only apply when the visual state group specified in the target matches the specified visual state.
 A couple of practical examples:
-
 #### Task list button corner radius
-
 ![Screenshot](https://i.imgur.com/zDATi9K.png)
-
 * Target: `Taskbar.TaskListButton`
 * Style: `CornerRadius=0`
-
 #### Running indicator size and color
-
 ![Screenshot](https://i.imgur.com/mR5c3F5.png)
-
-* Target: `Taskbar.TaskListLabeledButtonPanel@RunningIndicatorStates >
-  Rectangle#RunningIndicator`
+* Target: `Taskbar.TaskListLabeledButtonPanel@RunningIndicatorStates >  Rectangle#RunningIndicator`
 * Styles:
-    * `Fill=#FFED7014`
-    * `Height=2`
-    * `Width=12`
-    * `Fill@ActiveRunningIndicator=Red`
-    * `Width@ActiveRunningIndicator=20`
-
+  * `Fill=#FFED7014`
+  * `Height=2`
+  * `Width=12`
+  * `Fill@ActiveRunningIndicator=Red`
+  * `Width@ActiveRunningIndicator=20`
 #### Task list button background gradient
-
 ![Screenshot](https://i.imgur.com/LNPcw0G.png)
-
 * Targets:
-    * `Taskbar.TaskListButtonPanel > Border#BackgroundElement`
-    * `Taskbar.TaskListLabeledButtonPanel > Border#BackgroundElement`
-* Style: `Background:=<LinearGradientBrush StartPoint="0.5,0"
-  EndPoint="0.5,1"><GradientStop Offset="0" Color="DodgerBlue"/><GradientStop
-  Offset="1" Color="Yellow"/></LinearGradientBrush>`
+  * `Taskbar.TaskListButtonPanel > Border#BackgroundElement`
+  * `Taskbar.TaskListLabeledButtonPanel > Border#BackgroundElement`
+* Style: `Background:=<LinearGradientBrush StartPoint="0.5,0" EndPoint="0.5,1"><GradientStop Offset="0" Color="DodgerBlue"/><GradientStop Offset="1" Color="Yellow"/></LinearGradientBrush>`
 
 #### Hide the start button
-
-* Target:
-  `Taskbar.ExperienceToggleButton#LaunchListButton[AutomationProperties.AutomationId=StartButton]`
+* Target: `Taskbar.ExperienceToggleButton#LaunchListButton[AutomationProperties.AutomationId=StartButton]`
 * Style: `Visibility=Collapsed`
-
 #### Hide the network notification icon
-
-* Target: `SystemTray.OmniButton#ControlCenterButton > Grid > ContentPresenter >
-  ItemsPresenter > StackPanel > ContentPresenter[1] > SystemTray.IconView >
-  Grid > Grid`
+* Target: `SystemTray.OmniButton#ControlCenterButton > Grid > ContentPresenter > ItemsPresenter > StackPanel > ContentPresenter[1] > SystemTray.IconView > Grid > Grid`
 * Style: `Visibility=Collapsed`
-
-**Note**: To hide the volume notification icon instead, use `[2]` instead of
-`[1]`.
+**Note**: To hide the volume notification icon instead, use `[2]` instead of `[1]`.
 
 ### Resource variables
-
-Some variables, such as size and padding for various controls, are defined as
-resource variables. Here are several examples:
-
-* `TaskbarContextMenuMargin`: The margin between the taskbar and the start
-  button context menu.
-
-* `ContextMenuMargin`: The margin between the taskbar and the tray area context
-  menu.
-
+Some variables, such as size and padding for various controls, are defined as resource variables. Here are several examples:
+* `TaskbarContextMenuMargin`: The margin between the taskbar and the start button context menu.
+* `ContextMenuMargin`: The margin between the taskbar and the tray area context menu.
 * `MediumTaskbarButtonExtent`: The width of the taskbar buttons.
 
 ## Implementation notes
-
-The VisualTreeWatcher implementation is based on the
-[ExplorerTAP](https://github.com/TranslucentTB/TranslucentTB/tree/develop/ExplorerTAP)
-code from the **TranslucentTB** project.
+The VisualTreeWatcher implementation is based on the [ExplorerTAP](https://github.com/TranslucentTB/TranslucentTB/tree/develop/ExplorerTAP) code from the **TranslucentTB** project.
 */
 // ==/WindhawkModReadme==
 
