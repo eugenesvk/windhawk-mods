@@ -11,30 +11,17 @@
 // @architecture    x86-64
 // @compilerOptions -lole32 -loleaut32 -lruntimeobject
 // ==/WindhawkMod==
-
-// Source code is published under The GNU General Public License v3.0.
-//
-// For bug reports and feature requests, please open an issue here:
-// https://github.com/ramensoftware/windhawk-mods/issues
-//
-// For pull requests, development takes place here:
-// https://github.com/m417z/my-windhawk-mods
-
+// GNU General Public License v3.0
+// Bug: github.com/ramensoftware/windhawk-mods/issues
+// FR: github.com/m417z/my-windhawk-mods
 // ==WindhawkModReadme==
 /*
 # Taskbar tray icon spacing
-
-Reduce or increase the spacing between tray icons on the taskbar.
-
-Only Windows 11 version 22H2 or newer is currently supported. For older Windows
-versions check out [7+ Taskbar Tweaker](https://tweaker.ramensoftware.com/).
-
+Reduce or increase the spacing between tray icons on the taskbar. Only Windows 11 version 22H2 or newer is currently supported. For older Windows versions check out [7+ Taskbar Tweaker](https://tweaker.ramensoftware.com/).
 ![Tray icon width: 32](https://i.imgur.com/78eRcAJ.png) \
 *Tray icon width: 32 (Windows 11 default)*
-
 ![Tray icon width: 24](https://i.imgur.com/4hgxHJ0.png) \
 *Tray icon width: 24*
-
 ![Tray icon width: 18](https://i.imgur.com/cErw24I.png) \
 *Tray icon width: 18*
 */
