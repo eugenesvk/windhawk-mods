@@ -11,27 +11,14 @@
 // @architecture    x86-64
 // @compilerOptions -lversion
 // ==/WindhawkMod==
-
-// Source code is published under The GNU General Public License v3.0.
-//
-// For bug reports and feature requests, please open an issue here:
-// https://github.com/ramensoftware/windhawk-mods/issues
-//
-// For pull requests, development takes place here:
-// https://github.com/m417z/my-windhawk-mods
-
+// The GNU General Public License v3.0
+// FRs/bugs: github.com/ramensoftware/windhawk-mods/issues
+// PRs     : github.com/m417z/my-windhawk-mods
 // ==WindhawkModReadme==
 /*
 # Disable Taskbar Thumbnails
-
-Disable taskbar thumbnails on hover, or replace them with a list.
-
-Only Windows 10 64-bit and Windows 11 are supported. For older Windows versions
-check out [7+ Taskbar Tweaker](https://tweaker.ramensoftware.com/).
-
-**Note:** To customize the old taskbar on Windows 11 (if using ExplorerPatcher
-or a similar tool), enable the relevant option in the mod's settings.
-
+Disable taskbar thumbnails on hover, or replace them with a list. Only Win10 x64 and Win11.
+**Note:** To customize the old taskbar on Windows 11 (if using ExplorerPatcher or a similar tool), enable the relevant option in the mod's settings.
 ![Demonstration](https://i.imgur.com/62DSgxs.png)
 */
 // ==/WindhawkModReadme==
@@ -47,13 +34,11 @@ or a similar tool), enable the relevant option in the mod's settings.
 - noTooltips: false
   $name: Disable tooltips on hover
   $description: >-
-    Only works for classic thumbnail previews, not for the new Windows 11
-    implementation of thumbnail previews
+    Only works for classic thumbnail previews, not for the new Windows 11 implementation of thumbnail previews
 - oldTaskbarOnWin11: false
   $name: Customize the old taskbar on Windows 11
   $description: >-
-    Enable this option to customize the old taskbar on Windows 11 (if using
-    ExplorerPatcher or a similar tool).
+    Enable this option to customize the old taskbar on Windows 11 (if using ExplorerPatcher or a similar tool).
 */
 // ==/WindhawkModSettings==
 
