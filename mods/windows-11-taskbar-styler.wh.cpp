@@ -21,6 +21,13 @@ Customize the taskbar with themes contributed by others or create your own.
 Also check out the **Windows 11 Start Menu Styler**, **Windows 11 Notification Center Styler** mods.
 ## Themes
 Themes are collections of styles. The following themes are integrated into the mod and can be selected in the settings:
+BottomDensy:
+  - icons at the bottom (adjust taskbar height to remove the top spacing and make the icons bigger @32, their "natural size")
+  - indicators right on top of icons (not overlapping)
+  - no useless padding
+  - no start button (use ∞ corner dimension)
+  - tiny inactive running indicator since most of the icons will have it
+  - change active running indicator color to match your borderless app background to make an icon "extend" into the app
 [![WinXP](https://raw.githubusercontent.com/ramensoftware/windows-11-taskbar-styling-guide/main/Themes/WinXP/screenshot-small.png)
 \
 WinXP](https://github.com/ramensoftware/windows-11-taskbar-styling-guide/blob/main/Themes/WinXP/README.md)
@@ -118,7 +125,7 @@ The VisualTreeWatcher implementation is based on the [ExplorerTAP](https://githu
 
 // ==WindhawkModSettings==
 /*
-- theme: ""
+- theme: "BottomDensy"
   $name: Theme
   $description: >-
     Themes are collections of styles. For details about the themes below, or for
@@ -126,6 +133,7 @@ The VisualTreeWatcher implementation is based on the [ExplorerTAP](https://githu
     in the mod details.
   $options:
   - "": None
+  - BottomDensy: BottomDensy
   - WinXP: WinXP
   - Bubbles: Bubbles
   - TranslucentTaskbar: TranslucentTaskbar
@@ -172,7 +180,7 @@ struct Theme {
 
 // clang-format off
 
-const Theme g_themeTest = {{
+const Theme g_themeBottomDensy = {{
   // Transparent taskbar
   ThemeTargetStyles{L"Taskbar.TaskbarFrame > Grid#RootGrid > Taskbar.TaskbarBackground > Grid > Rectangle#BackgroundFill",{
     L"Fill=Transparent"}},
@@ -181,23 +189,25 @@ const Theme g_themeTest = {{
 
   // Indicators: on top
   ThemeTargetStyles{L"Taskbar.TaskListLabeledButtonPanel@RunningIndicatorStates > Rectangle#RunningIndicator",{
-    L"Fill=#8f8f8f",L"Fill@ActiveRunningIndicator=#3eb9f9",
-    L"Height=2",L"Width=6",L"Width@ActiveRunningIndicator=30",
+    L"Fill=#8f8f8f",L"Fill@ActiveRunningIndicator=#fef9f0",
+    L"Height=2",L"Width=2",L"Width@ActiveRunningIndicator=32",
+    L"Margin=0,-2,0,0",
   }},
   ThemeTargetStyles{L"Rectangle#RunningIndicator"                  	,{L"VerticalAlignment=0"}},
   ThemeTargetStyles{L"Border#ProgressBarRoot"                      	,{L"VerticalAlignment=0"}},
   ThemeTargetStyles{L"Rectangle#DeterminateProgressBarIndicator"   	,{L"VerticalAlignment=0"}},
   ThemeTargetStyles{L"Rectangle#IndeterminateProgressBarIndicator" 	,{L"VerticalAlignment=0"}},
   ThemeTargetStyles{L"Rectangle#IndeterminateProgressBarIndicator2"	,{L"VerticalAlignment=0"}},
-
-  // Start button: hidden (use the ∞ angle to use it instead)
-  ThemeTargetStyles{L"Taskbar.ExperienceToggleButton#LaunchListButton[AutomationProperties.AutomationId=StartButton", {
-    L"Visibility=Collapsed",
+  // Icons @ bottom, no padding (adjust taskbar height to remove empty top)
+  ThemeTargetStyles{L"Taskbar.TaskListLabeledButtonPanel", {
+    L"Padding=2,0,2,0", //≝2,4,2,4
+    L"VerticalAlignment=2", //≝0
   }},
 
-  // ThemeTargetStyles{L"target", {
-  //   L"Style=Value",
-  // }},
+  // Start button: hidden (use the ∞ angle to use it instead)
+  ThemeTargetStyles{L"Taskbar.ExperienceToggleButton#LaunchListButton[AutomationProperties.AutomationId=StartButton]", {
+    L"Visibility=Collapsed",
+  }},
 }};
 
 const Theme g_themeWinXP = {{
@@ -2505,6 +2515,8 @@ void ProcessAllStylesFromSettings() {
     const Theme* theme = nullptr;
     if (wcscmp(themeName, L"WinXP") == 0) {
         theme = &g_themeWinXP;
+    } else if (wcscmp(themeName, L"BottomDensy") == 0) {
+        theme = &g_themeBottomDensy;
     } else if (wcscmp(themeName, L"Bubbles") == 0) {
         theme = &g_themeBubbles;
     } else if (wcscmp(themeName, L"TranslucentTaskbar") == 0) {
