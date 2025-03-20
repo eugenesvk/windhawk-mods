@@ -287,14 +287,6 @@ class StringSetting {
     string_setting_unique_ptr m_stringSetting;
 };
 
-struct WebContentsSettings {
-    StringSetting url;
-    StringSetting blockStart;
-    StringSetting start;
-    StringSetting end;
-    int maxLength;
-};
-
 struct TextStyleSettings {
     bool hidden;
     StringSetting textColor;
@@ -321,19 +313,10 @@ struct {
     int height;
     int maxWidth;
     int textSpacing;
-    std::vector<WebContentsSettings> webContentsItems;
-    int webContentsUpdateInterval;
     std::vector<StringSetting> timeZones;
     TextStyleSettings timeStyle;
     TextStyleSettings dateStyle;
     bool oldTaskbarOnWin11;
-
-    // Kept for compatibility with old settings:
-    StringSetting webContentsUrl;
-    StringSetting webContentsBlockStart;
-    StringSetting webContentsStart;
-    StringSetting webContentsEnd;
-    int webContentsMaxLength;
 } g_settings;
 
 #define FORMATTED_BUFFER_SIZE 256
@@ -377,19 +360,6 @@ FormattedString<INTEGER_BUFFER_SIZE> g_dayOfYearFormatted;
 FormattedString<FORMATTED_BUFFER_SIZE> g_timezoneFormatted;
 
 std::vector<std::optional<DYNAMIC_TIME_ZONE_INFORMATION>> g_timeZoneInformation;
-
-HANDLE g_webContentUpdateThread;
-HANDLE g_webContentUpdateRefreshEvent;
-HANDLE g_webContentUpdateStopEvent;
-std::mutex g_webContentMutex;
-std::atomic<bool> g_webContentLoaded;
-
-std::vector<std::optional<std::wstring>> g_webContentStrings;
-std::vector<std::optional<std::wstring>> g_webContentStringsFull;
-
-// Kept for compatibility with old settings:
-WCHAR g_webContent[FORMATTED_BUFFER_SIZE];
-WCHAR g_webContentFull[FORMATTED_BUFFER_SIZE];
 
 struct ClockElementStyleData {
     winrt::weak_ref<FrameworkElement> dateTimeIconContentElement;
@@ -522,199 +492,6 @@ int StringCopyTruncated(PWSTR dest,
     *dest = L'\0';
     *truncated = *src;
     return i;
-}
-
-std::wstring ExtractWebContent(const std::wstring& webContent,
-                               PCWSTR webContentsBlockStart,
-                               PCWSTR webContentsStart,
-                               PCWSTR webContentsEnd) {
-    auto block = webContent.find(webContentsBlockStart);
-    if (block == std::wstring::npos) {
-        return std::wstring();
-    }
-
-    auto start = webContent.find(webContentsStart, block);
-    if (start == std::wstring::npos) {
-        return std::wstring();
-    }
-
-    start += wcslen(webContentsStart);
-
-    auto end = webContent.find(webContentsEnd, start);
-    if (end == std::wstring::npos) {
-        return std::wstring();
-    }
-
-    return webContent.substr(start, end - start);
-}
-
-void UpdateWebContent() {
-    int failed = 0;
-
-    std::wstring lastUrl;
-    std::optional<std::wstring> urlContent;
-
-    // Kept for compatibility with old settings:
-    if (g_settings.webContentsUrl && g_settings.webContentsBlockStart &&
-        g_settings.webContentsStart && g_settings.webContentsEnd) {
-        lastUrl = g_settings.webContentsUrl;
-        urlContent =
-            GetUrlContent(g_settings.webContentsUrl, /*failIfNot200=*/false);
-
-        std::wstring extracted;
-        if (urlContent) {
-            extracted = ExtractWebContent(
-                *urlContent, g_settings.webContentsBlockStart,
-                g_settings.webContentsStart, g_settings.webContentsEnd);
-
-            std::lock_guard<std::mutex> guard(g_webContentMutex);
-
-            int maxLen = ARRAYSIZE(g_webContent) - 1;
-            if (g_settings.webContentsMaxLength > 0 &&
-                g_settings.webContentsMaxLength < maxLen) {
-                maxLen = g_settings.webContentsMaxLength;
-            }
-
-            bool truncated;
-            StringCopyTruncated(g_webContent, maxLen + 1, extracted.c_str(),
-                                &truncated);
-            if (truncated && maxLen >= 3) {
-                g_webContent[maxLen - 1] = L'.';
-                g_webContent[maxLen - 2] = L'.';
-                g_webContent[maxLen - 3] = L'.';
-            }
-
-            maxLen = ARRAYSIZE(g_webContentFull) - 1;
-            StringCopyTruncated(g_webContentFull, maxLen + 1, extracted.c_str(),
-                                &truncated);
-            if (truncated && maxLen >= 3) {
-                g_webContentFull[maxLen - 1] = L'.';
-                g_webContentFull[maxLen - 2] = L'.';
-                g_webContentFull[maxLen - 3] = L'.';
-            }
-        } else {
-            failed++;
-        }
-    }
-
-    for (size_t i = 0; i < g_settings.webContentsItems.size(); i++) {
-        const auto& item = g_settings.webContentsItems[i];
-
-        if (item.url.get() != lastUrl) {
-            lastUrl = item.url;
-            urlContent = GetUrlContent(item.url, /*failIfNot200=*/false);
-        }
-
-        if (!urlContent) {
-            failed++;
-            continue;
-        }
-
-        std::wstring extracted = ExtractWebContent(*urlContent, item.blockStart,
-                                                   item.start, item.end);
-
-        std::lock_guard<std::mutex> guard(g_webContentMutex);
-
-        if (item.maxLength <= 0 ||
-            extracted.length() <= (size_t)item.maxLength) {
-            g_webContentStrings[i] = extracted;
-        } else {
-            std::wstring truncated(extracted.begin(),
-                                   extracted.begin() + item.maxLength);
-            if (truncated.length() >= 3) {
-                truncated[truncated.length() - 1] = L'.';
-                truncated[truncated.length() - 2] = L'.';
-                truncated[truncated.length() - 3] = L'.';
-            }
-
-            g_webContentStrings[i] = std::move(truncated);
-        }
-
-        g_webContentStringsFull[i] = std::move(extracted);
-    }
-
-    if (failed == 0) {
-        g_webContentLoaded = true;
-    }
-}
-
-DWORD WINAPI WebContentUpdateThread(LPVOID lpThreadParameter) {
-    constexpr DWORD kSecondsForQuickRetry = 30;
-
-    HANDLE handles[] = {
-        g_webContentUpdateStopEvent,
-        g_webContentUpdateRefreshEvent,
-    };
-
-    while (true) {
-        UpdateWebContent();
-
-        DWORD seconds = g_settings.webContentsUpdateInterval >= 1
-                            ? g_settings.webContentsUpdateInterval * 60
-                            : 1;
-        if (!g_webContentLoaded && seconds > kSecondsForQuickRetry) {
-            seconds = kSecondsForQuickRetry;
-        }
-
-        DWORD dwWaitResult = WaitForMultipleObjects(ARRAYSIZE(handles), handles,
-                                                    FALSE, seconds * 1000);
-
-        if (dwWaitResult == WAIT_FAILED) {
-            Wh_Log(L"WAIT_FAILED");
-            break;
-        }
-
-        if (dwWaitResult == WAIT_OBJECT_0) {
-            break;
-        }
-    }
-
-    return 0;
-}
-
-void WebContentUpdateThreadInit() {
-    std::lock_guard<std::mutex> guard(g_webContentMutex);
-
-    g_webContentLoaded = false;
-
-    *g_webContent = L'\0';
-    *g_webContentFull = L'\0';
-
-    g_webContentStrings.clear();
-    g_webContentStrings.resize(g_settings.webContentsItems.size());
-    g_webContentStringsFull.clear();
-    g_webContentStringsFull.resize(g_settings.webContentsItems.size());
-
-    // A fuzzy check to see if any of the lines contain the web content pattern.
-    // If not, no need to fire up the thread.
-    bool webContentsIsBeingUsed = wcsstr(g_settings.topLine, L"%web") ||
-                                  wcsstr(g_settings.bottomLine, L"%web") ||
-                                  wcsstr(g_settings.middleLine, L"%web") ||
-                                  wcsstr(g_settings.tooltipLine, L"%web");
-
-    if (webContentsIsBeingUsed &&
-        ((g_settings.webContentsUrl && *g_settings.webContentsUrl) ||
-         g_settings.webContentsItems.size() > 0)) {
-        g_webContentUpdateRefreshEvent =
-            CreateEvent(nullptr, FALSE, FALSE, nullptr);
-        g_webContentUpdateStopEvent =
-            CreateEvent(nullptr, TRUE, FALSE, nullptr);
-        g_webContentUpdateThread = CreateThread(
-            nullptr, 0, WebContentUpdateThread, nullptr, 0, nullptr);
-    }
-}
-
-void WebContentUpdateThreadUninit() {
-    if (g_webContentUpdateThread) {
-        SetEvent(g_webContentUpdateStopEvent);
-        WaitForSingleObject(g_webContentUpdateThread, INFINITE);
-        CloseHandle(g_webContentUpdateThread);
-        g_webContentUpdateThread = nullptr;
-        CloseHandle(g_webContentUpdateRefreshEvent);
-        g_webContentUpdateRefreshEvent = nullptr;
-        CloseHandle(g_webContentUpdateStopEvent);
-        g_webContentUpdateStopEvent = nullptr;
-    }
 }
 
 std::optional<DYNAMIC_TIME_ZONE_INFORMATION> GetTimeZoneInformation(
@@ -1352,18 +1129,6 @@ size_t ResolveFormatToken(std::wstring_view format, PCWSTR* resolved) {
         return formatTzToken.prefix.size() + 2;
     }
 
-    if (auto token = L"%web%"sv; format.starts_with(token)) {
-        std::lock_guard<std::mutex> guard(g_webContentMutex);
-        *resolved = *g_webContent ? g_webContent : L"Loading...";
-        return token.size();
-    }
-
-    if (auto token = L"%web_full%"sv; format.starts_with(token)) {
-        std::lock_guard<std::mutex> guard(g_webContentMutex);
-        *resolved = *g_webContentFull ? g_webContentFull : L"Loading...";
-        return token.size();
-    }
-
     using FormattedStringVectorGetter = std::vector<std::wstring>* (*)();
 
     struct {
@@ -1390,39 +1155,6 @@ size_t ResolveFormatToken(std::wstring_view format, PCWSTR* resolved) {
         }
 
         return formatExtraToken.prefix.size() + 2;
-    }
-
-    if (int digit = ResolveFormatTokenWithDigit(format, L"%web"sv, L"%"sv)) {
-        size_t index = digit - 1;
-
-        std::lock_guard<std::mutex> guard(g_webContentMutex);
-
-        if (index >= g_webContentStrings.size()) {
-            *resolved = L"-";
-        } else if (!g_webContentStrings[index]) {
-            *resolved = L"Loading...";
-        } else {
-            *resolved = g_webContentStrings[index]->c_str();
-        }
-
-        return "%web1%"sv.size();
-    }
-
-    if (int digit =
-            ResolveFormatTokenWithDigit(format, L"%web"sv, L"_full%"sv)) {
-        size_t index = digit - 1;
-
-        std::lock_guard<std::mutex> guard(g_webContentMutex);
-
-        if (index >= g_webContentStringsFull.size()) {
-            *resolved = L"-";
-        } else if (!g_webContentStringsFull[index]) {
-            *resolved = L"Loading...";
-        } else {
-            *resolved = g_webContentStringsFull[index]->c_str();
-        }
-
-        return "%web1_full%"sv.size();
     }
 
     return 0;
@@ -1525,8 +1257,7 @@ void WINAPI ClockSystemTrayIconDataModel_RefreshIcon_Hook(LPVOID pThis,
     Wh_Log(L">");
 
     g_refreshIconThreadId = GetCurrentThreadId();
-    g_refreshIconNeedToAdjustTimer =
-        g_settings.showSeconds || !g_webContentLoaded;
+    g_refreshIconNeedToAdjustTimer = g_settings.showSeconds;
 
     ClockSystemTrayIconDataModel_RefreshIcon_Original(pThis, param1);
 
@@ -2172,16 +1903,6 @@ LRESULT WINAPI SendMessageW_Hook(HWND hWnd,
         return ret;
     }
 
-    Wh_Log(L"Resumed, refreshing web contents");
-
-    std::lock_guard<std::mutex> guard(g_webContentMutex);
-
-    HANDLE event = g_webContentUpdateRefreshEvent;
-    if (event) {
-        g_webContentLoaded = false;
-        SetEvent(event);
-    }
-
     return ret;
 }
 
@@ -2260,7 +1981,7 @@ ClockButton_UpdateTextStringsIfNecessary_Hook(LPVOID pThis, bool* param1) {
 
     g_updateTextStringThreadId = 0;
 
-    if (g_settings.showSeconds || !g_webContentLoaded) {
+    if (g_settings.showSeconds) {
         // Return the time-out value for the time of the next update.
         SYSTEMTIME time;
         GetLocalTime(&time);
@@ -2748,26 +2469,6 @@ void LoadSettings() {
     g_settings.maxWidth = Wh_GetIntSetting(L"MaxWidth");
     g_settings.textSpacing = Wh_GetIntSetting(L"TextSpacing");
 
-    g_settings.webContentsItems.clear();
-    for (int i = 0;; i++) {
-        WebContentsSettings item;
-        item.url = Wh_GetStringSetting(L"WebContentsItems[%d].Url", i);
-        if (*item.url == '\0') {
-            break;
-        }
-
-        item.blockStart =
-            Wh_GetStringSetting(L"WebContentsItems[%d].BlockStart", i);
-        item.start = Wh_GetStringSetting(L"WebContentsItems[%d].Start", i);
-        item.end = Wh_GetStringSetting(L"WebContentsItems[%d].End", i);
-        item.maxLength = Wh_GetIntSetting(L"WebContentsItems[%d].MaxLength", i);
-
-        g_settings.webContentsItems.push_back(std::move(item));
-    }
-
-    g_settings.webContentsUpdateInterval =
-        Wh_GetIntSetting(L"WebContentsUpdateInterval");
-
     g_timeZoneInformation.clear();
     g_timeFormattedTz.clear();
     g_dateFormattedTz.clear();
@@ -2837,24 +2538,6 @@ void LoadSettings() {
     g_clockElementStyleIndex++;
 
     g_settings.oldTaskbarOnWin11 = Wh_GetIntSetting(L"oldTaskbarOnWin11");
-
-    // Kept for compatibility with old settings:
-    if (wcsstr(g_settings.topLine, L"%web%") ||
-        wcsstr(g_settings.bottomLine, L"%web%") ||
-        wcsstr(g_settings.middleLine, L"%web%") ||
-        wcsstr(g_settings.tooltipLine, L"%web%") ||
-        wcsstr(g_settings.topLine, L"%web_full%") ||
-        wcsstr(g_settings.bottomLine, L"%web_full%") ||
-        wcsstr(g_settings.middleLine, L"%web_full%") ||
-        wcsstr(g_settings.tooltipLine, L"%web_full%")) {
-        g_settings.webContentsUrl = Wh_GetStringSetting(L"WebContentsUrl");
-        g_settings.webContentsBlockStart =
-            Wh_GetStringSetting(L"WebContentsBlockStart");
-        g_settings.webContentsStart = Wh_GetStringSetting(L"WebContentsStart");
-        g_settings.webContentsEnd = Wh_GetStringSetting(L"WebContentsEnd");
-        g_settings.webContentsMaxLength =
-            Wh_GetIntSetting(L"WebContentsMaxLength");
-    }
 }
 
 void ApplySettingsWin11() {
@@ -3107,8 +2790,6 @@ void Wh_ModAfterInit() {
         HandleLoadedExplorerPatcher();
     }
 
-    WebContentUpdateThreadInit();
-
     ApplySettings();
 }
 
@@ -3143,15 +2824,11 @@ void Wh_ModBeforeUninit() {
 void Wh_ModUninit() {
     Wh_Log(L">");
 
-    WebContentUpdateThreadUninit();
-
     ApplySettings();
 }
 
 BOOL Wh_ModSettingsChanged(BOOL* bReload) {
     Wh_Log(L">");
-
-    WebContentUpdateThreadUninit();
 
     bool prevOldTaskbarOnWin11 = g_settings.oldTaskbarOnWin11;
 
@@ -3161,8 +2838,6 @@ BOOL Wh_ModSettingsChanged(BOOL* bReload) {
     if (*bReload) {
         return TRUE;
     }
-
-    WebContentUpdateThreadInit();
 
     ApplySettings();
 
