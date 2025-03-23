@@ -199,9 +199,10 @@ const Theme g_themeBottomDensy = {{
     L"Height=2",L"Width=2",L"Width@ActiveRunningIndicator=32",
     L"Margin=0,-2,0,0",
   }},
+  ThemeTargetStyles{L"Taskbar.TaskListLabeledButtonPanel@RunningIndicatorStates > muxc:ProgressBar#ProgressIndicator",{L"VerticalAlignment=0"}},
   ThemeTargetStyles{L"Rectangle#RunningIndicator"                  	,{L"VerticalAlignment=0"}},
   ThemeTargetStyles{L"Border#ProgressBarRoot"                      	,{L"VerticalAlignment=0"}},
-  ThemeTargetStyles{L"Rectangle#DeterminateProgressBarIndicator"   	,{L"VerticalAlignment=0"}},
+  // ThemeTargetStyles{L"Rectangle#DeterminateProgressBarIndicator"	,{L"VerticalAlignment=3"}},
   ThemeTargetStyles{L"Rectangle#IndeterminateProgressBarIndicator" 	,{L"VerticalAlignment=0"}},
   ThemeTargetStyles{L"Rectangle#IndeterminateProgressBarIndicator2"	,{L"VerticalAlignment=0"}},
   // Icons @ bottom, no padding (adjust taskbar height to remove empty top)
@@ -231,9 +232,10 @@ const Theme g_themeBottomDensyNoInd = {{
     L"Height@ActiveRunningIndicator=2",L"Width@ActiveRunningIndicator=32",
     L"Margin@ActiveRunningIndicator=0,-2,0,0",
   }},
+  ThemeTargetStyles{L"Taskbar.TaskListLabeledButtonPanel@RunningIndicatorStates > muxc:ProgressBar#ProgressIndicator",{L"VerticalAlignment=0"}},
   ThemeTargetStyles{L"Rectangle#RunningIndicator"                  	,{L"VerticalAlignment=0"}},
   ThemeTargetStyles{L"Border#ProgressBarRoot"                      	,{L"VerticalAlignment=0"}},
-  ThemeTargetStyles{L"Rectangle#DeterminateProgressBarIndicator"   	,{L"VerticalAlignment=0"}},
+  // ThemeTargetStyles{L"Rectangle#DeterminateProgressBarIndicator"	,{L"VerticalAlignment=3"}},
   ThemeTargetStyles{L"Rectangle#IndeterminateProgressBarIndicator" 	,{L"VerticalAlignment=0"}},
   ThemeTargetStyles{L"Rectangle#IndeterminateProgressBarIndicator2"	,{L"VerticalAlignment=0"}},
   // Icon indicators:
