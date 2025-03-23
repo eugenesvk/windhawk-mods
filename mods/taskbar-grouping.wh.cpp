@@ -11,37 +11,19 @@
 // @architecture    x86-64
 // @compilerOptions -D__USE_MINGW_ANSI_STDIO=0 -lcomctl32 -loleaut32 -lole32 -lshlwapi -lversion
 // ==/WindhawkMod==
-
-// Source code is published under The GNU General Public License v3.0.
-//
-// For bug reports and feature requests, please open an issue here:
-// https://github.com/ramensoftware/windhawk-mods/issues
-//
-// For pull requests, development takes place here:
-// https://github.com/m417z/my-windhawk-mods
-
+// The GNU General Public License v3.0
+// FRs/bugs: github.com/ramensoftware/windhawk-mods/issues
+// PRs     : github.com/m417z/my-windhawk-mods
 // ==WindhawkModReadme==
 /*
 # Disable grouping on the taskbar
-
-Causes a separate button to be created on the taskbar for each new window. For
-example, notice the two separate buttons for Notepad on the screenshot:
-
+Causes a separate button to be created on the taskbar for each new window. For example, notice the two separate buttons for Notepad on the screenshot:
 ![Demonstration](https://i.imgur.com/uLITliK.png)
-
-Also, custom groups can be configured in the settings. For example, you can
-choose to group Paint and Notepad:
-
+Also, custom groups can be configured in the settings. For example, you can choose to group Paint and Notepad:
 ![Custom groups](https://i.imgur.com/moj4nOV.png)
-
-**Note:** After enabling the mod, the relevant windows must be reopened to apply
-the grouping settings.
-
-Only Windows 10 64-bit and Windows 11 are supported. For other Windows versions
-check out [7+ Taskbar Tweaker](https://tweaker.ramensoftware.com/).
-
-**Note:** To customize the old taskbar on Windows 11 (if using ExplorerPatcher
-or a similar tool), enable the relevant option in the mod's settings.
+**Note:** After enabling the mod, the relevant windows must be reopened to apply the grouping settings.
+Only Windows 10 64-bit and Windows 11 are supported. For other Windows versions check out [7+ Taskbar Tweaker](https://tweaker.ramensoftware.com/).
+**Note:** To customize the old taskbar on Windows 11 (if using ExplorerPatcher or a similar tool), enable the relevant option in the mod's settings.
 */
 // ==/WindhawkModReadme==
 
@@ -66,11 +48,7 @@ or a similar tool), enable the relevant option in the mod's settings.
 - useWindowIcons: false
   $name: Use window icons
   $description: >-
-    By default, application icons are used. Enable this option to use window
-    icons instead. Usually it doesn't matter, an example where it does is an
-    open folder window - with application icons, the icon on the taskbar is
-    always the icon of Explorer, while with window icons, the icon changes
-    depending on the open folder.
+    By default, application icons are used. Enable this option to use window icons instead. Usually it doesn't matter, an example where it does is an open folder window - with application icons, the icon on the taskbar is always the icon of Explorer, while with window icons, the icon changes depending on the open folder.
 - customGroups:
   - - name: Group 1
       $name: Group name
@@ -105,8 +83,7 @@ or a similar tool), enable the relevant option in the mod's settings.
 - oldTaskbarOnWin11: false
   $name: Customize the old taskbar on Windows 11
   $description: >-
-    Enable this option to customize the old taskbar on Windows 11 (if using
-    ExplorerPatcher or a similar tool).
+    Enable this option to customize the old taskbar on Windows 11 (if using ExplorerPatcher or a similar tool).
 */
 // ==/WindhawkModSettings==
 
