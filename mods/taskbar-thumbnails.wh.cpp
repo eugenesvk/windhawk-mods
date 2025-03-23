@@ -25,7 +25,7 @@ Disable taskbar thumbnails on hover, or replace them with a list. Only Win10 x64
 
 // ==WindhawkModSettings==
 /*
-- mode: disabled
+- mode: list
   $name: Preview on hover
   $options:
   - disabled: Disabled
