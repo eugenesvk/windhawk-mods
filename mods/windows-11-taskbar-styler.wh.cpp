@@ -210,6 +210,7 @@ const Theme g_themeBottomDensy = {{
     L"Padding=2,0,2,0", //≝2,4,2,4
     L"VerticalAlignment=2", //≝0
   }},
+  // VerticalAlignment relative to parent's layout slot: 0=Top 1=Center 2=Bottom 3=Stretch (fill)
 
   // Start button: hidden (use the ∞ angle to use it instead)
   ThemeTargetStyles{L"Taskbar.ExperienceToggleButton#LaunchListButton[AutomationProperties.AutomationId=StartButton]", {
