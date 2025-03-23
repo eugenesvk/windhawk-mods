@@ -29,15 +29,15 @@ Reduce or increase the spacing between tray icons on the taskbar. Only Windows 1
 
 // ==WindhawkModSettings==
 /*
-- notificationIconWidth: 24
+- notificationIconWidth: 18
   $name: Tray icon width
   $description: 'Windows 11 ≝32'
-- overflowIconWidth: 32
+- overflowIconWidth: 40
   $name: Tray overflow icon width
   $description: >-
     The width of icons that appear in the overflow popup when clicking on the
     chevron icon. Windows 11 ≝40
-- overflowIconsPerRow: 5
+- overflowIconsPerRow: 6
   $name: Tray overflow icons per row
   $description: >-
     The maximum amount of icons per row in the overflow popup. Windows 11 ≝5
