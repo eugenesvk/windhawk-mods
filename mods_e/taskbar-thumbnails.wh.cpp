@@ -1,0 +1,1 @@
+../taskbar-thumbnails.wh.cpp
