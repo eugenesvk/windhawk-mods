@@ -1431,42 +1431,47 @@ const Theme g_theme21996Taskbar = {{
 }};
 
 const Theme g_themeBottomDensy = {{
-    ThemeTargetStyles{L"Taskbar.TaskbarFrame > Grid#RootGrid > Taskbar.TaskbarBackground > Grid > Rectangle#BackgroundFill", {
-        L"Fill=Transparent"}},
-    ThemeTargetStyles{L"Rectangle#BackgroundStroke", {
-        L"Fill=Transparent"}},
-    ThemeTargetStyles{L"Taskbar.TaskListLabeledButtonPanel@RunningIndicatorStates > Rectangle#RunningIndicator", {
-        L"Fill=#8f8f8f",
-        L"Fill@ActiveRunningIndicator=#fef9f0",
-        L"Width=2",
-        L"Height=2",
-        L"Margin=0,-2,0,0",
-        L"Width@ActiveRunningIndicator=32"}},
-    ThemeTargetStyles{L"Taskbar.TaskListLabeledButtonPanel@RunningIndicatorStates > muxc:ProgressBar#ProgressIndicator", {
-        L"VerticalAlignment=0"}},
-    ThemeTargetStyles{L"Rectangle#RunningIndicator", {
-        L"VerticalAlignment=0"}},
-    ThemeTargetStyles{L"Border#ProgressBarRoot", {
-        L"VerticalAlignment=0"}},
-    ThemeTargetStyles{L"Rectangle#IndeterminateProgressBarIndicator", {
-        L"VerticalAlignment=0"}},
-    ThemeTargetStyles{L"Rectangle#IndeterminateProgressBarIndicator2", {
-        L"VerticalAlignment=0"}},
-    ThemeTargetStyles{L"Taskbar.TaskListLabeledButtonPanel", {
-        L"Padding=2,0,2,0",
-        L"VerticalAlignment=2"}},
-    ThemeTargetStyles{L"Taskbar.ExperienceToggleButton#LaunchListButton[AutomationProperties.AutomationId=StartButton]", {
-        L"Visibility=Collapsed"}},
-    ThemeTargetStyles{L"SystemTray.Stack#ShowDesktopStack", {
-        L"Width=1"}},
-    ThemeTargetStyles{L"Windows.UI.Xaml.Shapes.Rectangle#ShowDesktopPipe", {
-        L"HorizontalAlignment=0"}},
-    ThemeTargetStyles{L"SystemTray.NotificationAreaIcons#NotificationAreaIcons > ItemsPresenter > StackPanel > ContentPresenter > SystemTray.NotifyIconView#NotifyItemIcon > Grid#ContainerGrid > ContentPresenter#ContentPresenter > Grid#ContentGrid > SystemTray.ImageIconContent > Grid#ContainerGrid > Image", {
-        L"Width=20",
-        L"Height=20"}},
-    ThemeTargetStyles{L"WrapGrid > ContentPresenter > SystemTray.NotifyIconView > Grid#ContainerGrid > ContentPresenter#ContentPresenter > Grid#ContentGrid > SystemTray.ImageIconContent > Grid#ContainerGrid > Image", {
-        L"Width=20",
-        L"Height=20"}},
+  // Transparent taskbar
+  ThemeTargetStyles{L"Taskbar.TaskbarFrame > Grid#RootGrid > Taskbar.TaskbarBackground > Grid > Rectangle#BackgroundFill", {
+    L"Fill=Transparent"}},
+  ThemeTargetStyles{L"Rectangle#BackgroundStroke", {
+    L"Fill=Transparent"}},
+
+  // Indicators: on top
+  ThemeTargetStyles{L"Taskbar.TaskListLabeledButtonPanel@RunningIndicatorStates > Rectangle#RunningIndicator", {
+    L"Fill=#8f8f8f",L"Fill@ActiveRunningIndicator=#fef9f0",
+    L"Width=2",L"Height=2",L"Width@ActiveRunningIndicator=32",
+    L"Margin=0,-2,0,0",
+  }},
+  ThemeTargetStyles{L"Taskbar.TaskListLabeledButtonPanel@RunningIndicatorStates > muxc:ProgressBar#ProgressIndicator", {
+    L"VerticalAlignment=0"}},
+  ThemeTargetStyles{L"Rectangle#RunningIndicator"                  	,{L"VerticalAlignment=0"}},
+  ThemeTargetStyles{L"Border#ProgressBarRoot"                      	,{L"VerticalAlignment=0"}},
+  ThemeTargetStyles{L"Rectangle#IndeterminateProgressBarIndicator" 	,{L"VerticalAlignment=0"}},
+  ThemeTargetStyles{L"Rectangle#IndeterminateProgressBarIndicator2"	,{L"VerticalAlignment=0"}},
+
+  // Icons @ bottom, no padding (adjust taskbar height to remove empty top)
+  ThemeTargetStyles{L"Taskbar.TaskListLabeledButtonPanel", {
+    L"Padding=2,0,2,0", //≝2,4,2,4
+    L"VerticalAlignment=2", //≝0
+  }},
+  // VerticalAlignment relative to parent's layout slot: 0=Top 1=Center 2=Bottom 3=Stretch (fill)
+
+  // Start button: hidden (use the ∞ angle to use it instead)
+  ThemeTargetStyles{L"Taskbar.ExperienceToggleButton#LaunchListButton[AutomationProperties.AutomationId=StartButton]", {
+    L"Visibility=Collapsed"}},
+
+  // Show Desktop indicator: minimized to 1px for the same reason: ↘ corner has ∞ dimensions
+  ThemeTargetStyles{L"SystemTray.Stack#ShowDesktopStack", {
+    L"Width=1"}},
+
+  // Notification icons: bigger @`20` (set width to `@21` via another mod to have a small gap)
+  ThemeTargetStyles{L"Windows.UI.Xaml.Shapes.Rectangle#ShowDesktopPipe", {
+    L"HorizontalAlignment=0"}},
+  ThemeTargetStyles{L"SystemTray.NotificationAreaIcons#NotificationAreaIcons > ItemsPresenter > StackPanel > ContentPresenter > SystemTray.NotifyIconView#NotifyItemIcon > Grid#ContainerGrid > ContentPresenter#ContentPresenter > Grid#ContentGrid > SystemTray.ImageIconContent > Grid#ContainerGrid > Image", {
+    L"Width=20",L"Height=20",}}, //≝16 16
+  ThemeTargetStyles{L"WrapGrid > ContentPresenter > SystemTray.NotifyIconView > Grid#ContainerGrid > ContentPresenter#ContentPresenter > Grid#ContentGrid > SystemTray.ImageIconContent > Grid#ContainerGrid > Image", {
+    L"Width=20",L"Height=20",}}, //≝16 16
 }};
 
 const Theme g_themeBottomDensyNoInd = {{
