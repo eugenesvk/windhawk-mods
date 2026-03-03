@@ -122,10 +122,10 @@ styles, such as the font color and size.
 
 // ==WindhawkModSettings==
 /*
-- ShowSeconds: true
+- ShowSeconds: false
   $name: Show seconds
 - TimeFormat: >-
-    hh':'mm':'ss tt
+    H':'mm
   $name: Time format
   $description: >-
     The format for the %time% pattern. Leave empty for the default format. For
@@ -133,39 +133,39 @@ styles, such as the font color and size.
 
     https://docs.microsoft.com/en-us/windows/win32/api/datetimeapi/nf-datetimeapi-gettimeformatex#remarks
 - DateFormat: >-
-    ddd',' MMM dd yyyy
+    d MMM
   $name: Date format
   $description: >-
     The format for the %date% pattern. Leave empty for the default format. For
     syntax refer to the following page:
 
     https://docs.microsoft.com/en-us/windows/win32/intl/day--month--year--and-era-format-pictures
-- WeekdayFormat: dddd
+- WeekdayFormat: custom
   $name: Week day format
   $description: The format for the %weekday% pattern.
   $options:
   - dddd: Full day of the week
   - ddd: Abbreviated day of the week
   - custom: Custom, specified below
-- WeekdayFormatCustom: Sun, Mon, Tue, Wed, Thu, Fri, Sat
+- WeekdayFormatCustom: U, M, T, W, R, F, S
   $name: Custom week day format
   $description: >-
     A comma-separated list of custom week days, Sunday through Saturday. Used if
     the custom format is specified for the week day format.
-- TopLine: '%date% | %time%'
+- TopLine: '%weekday% %time%'
   $name: Top line
   $description: >-
     Text to be shown on the first line. Set to "-" for the default value. Refer
     to the mod details for list of patterns that can be used.
-- BottomLine: '%web1%'
+- BottomLine: '%date%'
   $name: Bottom line
   $description: >-
     Only shown if the taskbar is large enough. Set to "-" for the default value.
-- MiddleLine: '%weekday%'
+- MiddleLine: '-'
   $name: Middle line (Windows 10 only)
   $description: >-
     Only shown if the taskbar is large enough. Set to "-" for the default value.
-- TooltipLine: '%web1_full%'
+- TooltipLine: '-'
   $name: Tooltip extra line
 - TooltipLineMode: append
   $name: Tooltip line mode
