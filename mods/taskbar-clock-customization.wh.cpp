@@ -249,25 +249,6 @@ styles, such as the font color and size.
       Remove text in brackets from media info. E.g., "Song (feat. Artist)"
       becomes "Song".
   $name: Media player info
-- WebContentWeatherLocation: ""
-  $name: Weather location
-  $description: >-
-    Get weather information for a specific location. Keep empty to use the
-    current location. For details, refer to the documentation of wttr.in.
-- WebContentWeatherFormat: "%c \uD83C\uDF21\uFE0F%t \uD83C\uDF2C\uFE0F%w"
-  $name: Weather format
-  $description: >-
-    The weather information format. For details, refer to the documentation of
-    wttr.in.
-- WebContentWeatherUnits: autoDetect
-  $name: Weather units
-  $description: >-
-    The weather units. For details, refer to the documentation of wttr.in.
-  $options:
-  - autoDetect: Auto (default)
-  - uscs: USCS (used by default in US)
-  - metric: Metric (SI) (used by default everywhere except US)
-  - metricMsWind: Metric (SI), but show wind speed in m/s
 - TimeZones: ["Eastern Standard Time"]
   $name: Time zones
   $description: >-
@@ -497,28 +478,11 @@ struct MediaPlayerSettings {
     bool removeBrackets;
 };
 
-enum class WebContentWeatherUnits {
-    autoDetect,
-    uscs,
-    metric,
-    metricMsWind,
-};
-
 enum class ContentMode {
     plainText,
     html,
     xml,
     xmlHtml,
-};
-
-struct WebContentsSettings {
-    StringSetting url;
-    StringSetting blockStart;
-    StringSetting start;
-    StringSetting end;
-    ContentMode contentMode;
-    std::vector<std::pair<std::wregex, std::wstring>> searchReplace;
-    int maxLength;
 };
 
 struct TextStyleSettings {
@@ -550,22 +514,10 @@ struct {
     int textSpacing;
     DataCollectionSettings dataCollection;
     MediaPlayerSettings mediaPlayer;
-    StringSetting webContentWeatherLocation;
-    StringSetting webContentWeatherFormat;
-    WebContentWeatherUnits webContentWeatherUnits;
-    std::vector<WebContentsSettings> webContentsItems;
-    int webContentsUpdateInterval;
     std::vector<StringSetting> timeZones;
     TextStyleSettings timeStyle;
     TextStyleSettings dateStyle;
     bool oldTaskbarOnWin11;
-
-    // Kept for compatibility with old settings:
-    StringSetting webContentsUrl;
-    StringSetting webContentsBlockStart;
-    StringSetting webContentsStart;
-    StringSetting webContentsEnd;
-    int webContentsMaxLength;
 } g_settings;
 
 #define FORMATTED_BUFFER_SIZE 256
@@ -643,20 +595,6 @@ winrt::event_token g_mediaPropertiesChangedToken;
 winrt::event_token g_mediaPlaybackChangedToken;
 
 std::vector<std::optional<DYNAMIC_TIME_ZONE_INFORMATION>> g_timeZoneInformation;
-
-std::atomic<HANDLE> g_webContentUpdateThread;
-HANDLE g_webContentUpdateRefreshEvent;
-HANDLE g_webContentUpdateStopEvent;
-std::mutex g_webContentMutex;
-std::atomic<bool> g_webContentLoaded;
-
-std::vector<std::optional<std::wstring>> g_webContentStrings;
-std::vector<std::optional<std::wstring>> g_webContentStringsFull;
-std::optional<std::wstring> g_webContentWeather;
-
-// Kept for compatibility with old settings:
-WCHAR g_webContent[FORMATTED_BUFFER_SIZE];
-WCHAR g_webContentFull[FORMATTED_BUFFER_SIZE];
 
 struct ClockElementStyleData {
     winrt::weak_ref<FrameworkElement> dateTimeIconContentElement;
@@ -854,31 +792,6 @@ int StringCopyTruncatedWithEllipsis(PWSTR dest, size_t destSize, PCWSTR src) {
     return i;
 }
 
-std::wstring ExtractWebContent(std::wstring_view webContent,
-                               PCWSTR webContentsBlockStart,
-                               PCWSTR webContentsStart,
-                               PCWSTR webContentsEnd) {
-    auto block = webContent.find(webContentsBlockStart);
-    if (block == webContent.npos) {
-        return std::wstring();
-    }
-
-    auto start = webContent.find(webContentsStart, block);
-    if (start == webContent.npos) {
-        return std::wstring();
-    }
-
-    start += wcslen(webContentsStart);
-
-    auto end = *webContentsEnd ? webContent.find(webContentsEnd, start)
-                               : webContent.length();
-    if (end == webContent.npos) {
-        return std::wstring();
-    }
-
-    return std::wstring(webContent.substr(start, end - start));
-}
-
 std::wstring ExtractTextFromHtml(std::wstring html) {
     winrt::com_ptr<IHTMLDocument2> doc;
     winrt::check_hresult(CoCreateInstance(CLSID_HTMLDocument, nullptr,
@@ -963,295 +876,6 @@ std::wstring EscapeUrlComponent(PCWSTR input,
     }
 
     return out;
-}
-
-bool UpdateWeatherWebContent() {
-    std::wstring format = g_settings.webContentWeatherFormat.get();
-    if (format.empty()) {
-        format = L"%c \U0001F321\uFE0F%t \U0001F32C\uFE0F%w";
-    }
-
-    // Spaces are added after the weather emoji by the server. Add a marker
-    // character after it to be able to remove the spaces. See:
-    // https://github.com/chubin/wttr.in/issues/345
-    format = ReplaceAll(format, L"%c", L"%c\uE000");
-
-    std::wstring weatherUrl = L"https://wttr.in/";
-    weatherUrl += EscapeUrlComponent(g_settings.webContentWeatherLocation);
-    weatherUrl += L'?';
-    switch (g_settings.webContentWeatherUnits) {
-        case WebContentWeatherUnits::autoDetect:
-            break;
-        case WebContentWeatherUnits::uscs:
-            weatherUrl += L"u&";
-            break;
-        case WebContentWeatherUnits::metric:
-            weatherUrl += L"m&";
-            break;
-        case WebContentWeatherUnits::metricMsWind:
-            weatherUrl += L"M&";
-            break;
-    }
-    weatherUrl += L"format=";
-    weatherUrl += EscapeUrlComponent(format.c_str());
-
-    Wh_Log(L"Fetching weather from URL: %s", weatherUrl.c_str());
-
-    std::optional<std::wstring> urlContent = GetUrlContent(weatherUrl.c_str());
-    if (!urlContent) {
-        return false;
-    }
-
-    // Ignore non-weather responses.
-    if (urlContent->empty() ||
-        *urlContent == L"This query is already being processed") {
-        return false;
-    }
-
-    // Remove spaces after the %c emoji.
-    std::wstring weatherContent;
-
-    size_t lastPos = 0;
-    size_t findPos;
-
-    while ((findPos = urlContent->find(L'\uE000', lastPos)) !=
-           urlContent->npos) {
-        size_t lastPosCount = findPos - lastPos;
-        while (lastPosCount > 0 &&
-               urlContent->at(lastPos + lastPosCount - 1) == L' ') {
-            lastPosCount--;
-        }
-
-        weatherContent.append(*urlContent, lastPos, lastPosCount);
-        lastPos = findPos + 1;
-    }
-
-    // Care for the rest after last occurrence.
-    weatherContent += urlContent->substr(lastPos);
-
-    std::lock_guard<std::mutex> guard(g_webContentMutex);
-    g_webContentWeather = weatherContent;
-
-    return true;
-}
-
-void UpdateWebContent() {
-    int failed = 0;
-
-    std::wstring lastUrl;
-    std::optional<std::wstring> urlContent;
-
-    // Kept for compatibility with old settings:
-    if (g_settings.webContentsUrl && g_settings.webContentsBlockStart &&
-        g_settings.webContentsStart && g_settings.webContentsEnd) {
-        lastUrl = g_settings.webContentsUrl;
-        urlContent =
-            GetUrlContent(g_settings.webContentsUrl, /*failIfNot200=*/false);
-
-        std::wstring extracted;
-        if (urlContent) {
-            extracted = ExtractWebContent(
-                *urlContent, g_settings.webContentsBlockStart,
-                g_settings.webContentsStart, g_settings.webContentsEnd);
-
-            std::lock_guard<std::mutex> guard(g_webContentMutex);
-
-            int maxLen = ARRAYSIZE(g_webContent) - 1;
-            if (g_settings.webContentsMaxLength > 0 &&
-                g_settings.webContentsMaxLength < maxLen) {
-                maxLen = g_settings.webContentsMaxLength;
-            }
-
-            StringCopyTruncatedWithEllipsis(g_webContent, maxLen + 1,
-                                            extracted.c_str());
-
-            StringCopyTruncatedWithEllipsis(g_webContentFull,
-                                            ARRAYSIZE(g_webContentFull),
-                                            extracted.c_str());
-        } else {
-            failed++;
-        }
-    }
-
-    for (size_t i = 0; i < g_settings.webContentsItems.size(); i++) {
-        WCHAR patternSubstring[32];
-        swprintf_s(patternSubstring, L"%%web%i%%", i + 1);
-
-        WCHAR patternSubstringFull[32];
-        swprintf_s(patternSubstringFull, L"%%web%i_full%%", i + 1);
-
-        if (!IsStrInDateTimePatternSettings(patternSubstring) &&
-            !IsStrInDateTimePatternSettings(patternSubstringFull)) {
-            continue;
-        }
-
-        const auto& item = g_settings.webContentsItems[i];
-
-        if (item.url.get() != lastUrl) {
-            lastUrl = item.url;
-            urlContent = GetUrlContent(item.url, /*failIfNot200=*/false);
-        }
-
-        if (!urlContent) {
-            failed++;
-            continue;
-        }
-
-        std::wstring extracted = ExtractWebContent(*urlContent, item.blockStart,
-                                                   item.start, item.end);
-
-        try {
-            switch (item.contentMode) {
-                case ContentMode::plainText:
-                    break;
-
-                case ContentMode::html:
-                    extracted = ExtractTextFromHtml(extracted);
-                    break;
-
-                case ContentMode::xml:
-                    extracted = ExtractTextFromXml(extracted);
-                    break;
-
-                case ContentMode::xmlHtml:
-                    extracted =
-                        ExtractTextFromHtml(ExtractTextFromXml(extracted));
-                    break;
-            }
-        } catch (const winrt::hresult_error& ex) {
-            WCHAR buffer[256];
-            _snwprintf_s(buffer, _TRUNCATE, L"Content error %08X: %s",
-                         ex.code().value, ex.message().c_str());
-            extracted = buffer;
-        } catch (const std::exception& ex) {
-            WCHAR buffer[256];
-            _snwprintf_s(buffer, _TRUNCATE, L"Content error: %S", ex.what());
-            extracted = buffer;
-        }
-
-        for (const auto& [s, r] : item.searchReplace) {
-            try {
-                extracted = std::regex_replace(extracted, s, r);
-            } catch (const std::regex_error& ex) {
-                Wh_Log(L"Search/replace error %08X: %S",
-                       static_cast<DWORD>(ex.code()), ex.what());
-            }
-        }
-
-        std::lock_guard<std::mutex> guard(g_webContentMutex);
-
-        if (item.maxLength <= 0 ||
-            extracted.length() <= (size_t)item.maxLength) {
-            g_webContentStrings[i] = extracted;
-        } else {
-            std::wstring truncated(extracted.begin(),
-                                   extracted.begin() + item.maxLength);
-            if (truncated.length() >= 3) {
-                truncated[truncated.length() - 1] = L'.';
-                truncated[truncated.length() - 2] = L'.';
-                truncated[truncated.length() - 3] = L'.';
-            }
-
-            g_webContentStrings[i] = std::move(truncated);
-        }
-
-        g_webContentStringsFull[i] = std::move(extracted);
-    }
-
-    if (IsStrInDateTimePatternSettings(L"%weather%") &&
-        !UpdateWeatherWebContent()) {
-        failed++;
-    }
-
-    if (failed == 0) {
-        g_webContentLoaded = true;
-    }
-}
-
-DWORD WINAPI WebContentUpdateThread(LPVOID lpThreadParameter) {
-    constexpr DWORD kSecondsForQuickRetry = 30;
-
-    HANDLE handles[] = {
-        g_webContentUpdateStopEvent,
-        g_webContentUpdateRefreshEvent,
-    };
-
-    while (true) {
-        UpdateWebContent();
-
-        DWORD seconds = std::max(g_settings.webContentsUpdateInterval, 1) * 60;
-        if (!g_webContentLoaded && seconds > kSecondsForQuickRetry) {
-            seconds = kSecondsForQuickRetry;
-        }
-
-        DWORD dwWaitResult = WaitForMultipleObjects(ARRAYSIZE(handles), handles,
-                                                    FALSE, seconds * 1000);
-
-        if (dwWaitResult == WAIT_FAILED) {
-            Wh_Log(L"WAIT_FAILED");
-            break;
-        }
-
-        if (dwWaitResult == WAIT_OBJECT_0) {
-            break;
-        }
-    }
-
-    return 0;
-}
-
-void WebContentUpdateThreadInit() {
-    std::lock_guard<std::mutex> guard(g_webContentMutex);
-
-    g_webContentStrings.resize(g_settings.webContentsItems.size());
-    g_webContentStringsFull.resize(g_settings.webContentsItems.size());
-
-    // A fuzzy check to see if any of the lines contain the web content pattern.
-    // If not, no need to fire up the thread.
-    if (IsStrInDateTimePatternSettings(L"%web") ||
-        IsStrInDateTimePatternSettings(L"%weather%")) {
-        g_webContentUpdateRefreshEvent =
-            CreateEvent(nullptr, FALSE, FALSE, nullptr);
-        g_webContentUpdateStopEvent =
-            CreateEvent(nullptr, TRUE, FALSE, nullptr);
-        g_webContentUpdateThread = CreateThread(
-            nullptr, 0, WebContentUpdateThread, nullptr, 0, nullptr);
-    }
-}
-
-void WebContentUpdateThreadUninit() {
-    HANDLE thread;
-    HANDLE stopEvent;
-    HANDLE refreshEvent;
-
-    {
-        std::lock_guard<std::mutex> guard(g_webContentMutex);
-        thread = g_webContentUpdateThread;
-        stopEvent = g_webContentUpdateStopEvent;
-        refreshEvent = g_webContentUpdateRefreshEvent;
-        g_webContentUpdateThread = nullptr;
-        g_webContentUpdateStopEvent = nullptr;
-        g_webContentUpdateRefreshEvent = nullptr;
-    }
-
-    if (thread) {
-        SetEvent(stopEvent);
-        WaitForSingleObject(thread, INFINITE);
-        CloseHandle(thread);
-        CloseHandle(refreshEvent);
-        CloseHandle(stopEvent);
-    }
-
-    std::lock_guard<std::mutex> guard(g_webContentMutex);
-
-    g_webContentLoaded = false;
-
-    *g_webContent = L'\0';
-    *g_webContentFull = L'\0';
-
-    g_webContentStrings.clear();
-    g_webContentStringsFull.clear();
-    g_webContentWeather.reset();
 }
 
 std::optional<DYNAMIC_TIME_ZONE_INFORMATION> GetTimeZoneInformation(
@@ -3307,18 +2931,6 @@ size_t ResolveFormatToken(
         return formatTzToken.prefix.size() + 2;
     }
 
-    if (auto token = L"%web%"sv; format.starts_with(token)) {
-        std::lock_guard<std::mutex> guard(g_webContentMutex);
-        resolvedCallback(*g_webContent ? g_webContent : L"Loading...");
-        return token.size();
-    }
-
-    if (auto token = L"%web_full%"sv; format.starts_with(token)) {
-        std::lock_guard<std::mutex> guard(g_webContentMutex);
-        resolvedCallback(*g_webContentFull ? g_webContentFull : L"Loading...");
-        return token.size();
-    }
-
     using FormattedStringVectorGetter = std::vector<std::wstring>* (*)();
 
     struct {
@@ -3349,50 +2961,6 @@ size_t ResolveFormatToken(
         return formatExtraToken.prefix.size() + 2;
     }
 
-    if (int digit = ResolveFormatTokenWithDigit(format, L"%web"sv, L"%"sv)) {
-        size_t index = digit - 1;
-
-        std::lock_guard<std::mutex> guard(g_webContentMutex);
-
-        PCWSTR value;
-        if (index >= g_webContentStrings.size()) {
-            value = L"-";
-        } else if (!g_webContentStrings[index]) {
-            value = L"Loading...";
-        } else {
-            value = g_webContentStrings[index]->c_str();
-        }
-
-        resolvedCallback(value);
-        return "%web1%"sv.size();
-    }
-
-    if (int digit =
-            ResolveFormatTokenWithDigit(format, L"%web"sv, L"_full%"sv)) {
-        size_t index = digit - 1;
-
-        std::lock_guard<std::mutex> guard(g_webContentMutex);
-
-        PCWSTR value;
-        if (index >= g_webContentStringsFull.size()) {
-            value = L"-";
-        } else if (!g_webContentStringsFull[index]) {
-            value = L"Loading...";
-        } else {
-            value = g_webContentStringsFull[index]->c_str();
-        }
-
-        resolvedCallback(value);
-        return "%web1_full%"sv.size();
-    }
-
-    if (auto token = L"%weather%"sv; format.starts_with(token)) {
-        std::lock_guard<std::mutex> guard(g_webContentMutex);
-        resolvedCallback(g_webContentWeather ? g_webContentWeather->c_str()
-                                             : L"Loading...");
-        return token.size();
-    }
-
     return 0;
 }
 
@@ -3403,7 +2971,6 @@ void EnsureFormattingInitialized() {
 
     g_formattingInitialized = true;
 
-    WebContentUpdateThreadInit();
     DataCollectionSessionInit();
     MediaSessionInit();
 }
@@ -3517,9 +3084,7 @@ void ClockSystemTrayIconDataModel_RefreshIcon_Hook_Impl(
     LPVOID param1,
     ClockSystemTrayIconDataModel_RefreshIcon_t original) {
     g_refreshIconThreadId = GetCurrentThreadId();
-    bool webContentPending = g_webContentUpdateThread && !g_webContentLoaded;
-    g_refreshIconNeedToAdjustTimer =
-        g_settings.showSeconds || g_dataCollectionSession || webContentPending;
+    g_refreshIconNeedToAdjustTimer = g_settings.showSeconds || g_dataCollectionSession;
 
     original(pThis, param1);
 
@@ -4239,16 +3804,6 @@ LRESULT WINAPI SendMessageW_Hook(HWND hWnd,
         return ret;
     }
 
-    Wh_Log(L"Resumed, refreshing web contents");
-
-    std::lock_guard<std::mutex> guard(g_webContentMutex);
-
-    HANDLE event = g_webContentUpdateRefreshEvent;
-    if (event) {
-        g_webContentLoaded = false;
-        SetEvent(event);
-    }
-
     return ret;
 }
 
@@ -4332,9 +3887,7 @@ ClockButton_UpdateTextStringsIfNecessary_Hook(LPVOID pThis, bool* param1) {
 
     g_updateTextStringThreadId = 0;
 
-    bool webContentPending = g_webContentUpdateThread && !g_webContentLoaded;
-    if (g_settings.showSeconds || g_dataCollectionSession ||
-        webContentPending) {
+    if (g_settings.showSeconds || g_dataCollectionSession) {
         // Return the time-out value for the time of the next update.
         SYSTEMTIME time;
         GetLocalTime(&time);
@@ -4935,74 +4488,6 @@ void LoadSettings() {
         g_settings.mediaPlayer.ignoredPlayers.push_back(std::move(player));
     }
 
-    g_settings.webContentWeatherLocation =
-        StringSetting::make(L"WebContentWeatherLocation");
-    g_settings.webContentWeatherFormat =
-        StringSetting::make(L"WebContentWeatherFormat");
-
-    g_settings.webContentWeatherUnits = WebContentWeatherUnits::autoDetect;
-    StringSetting webContentWeatherUnits =
-        StringSetting::make(L"WebContentWeatherUnits");
-    if (wcscmp(webContentWeatherUnits, L"uscs") == 0) {
-        g_settings.webContentWeatherUnits = WebContentWeatherUnits::uscs;
-    } else if (wcscmp(webContentWeatherUnits, L"metric") == 0) {
-        g_settings.webContentWeatherUnits = WebContentWeatherUnits::metric;
-    } else if (wcscmp(webContentWeatherUnits, L"metricMsWind") == 0) {
-        g_settings.webContentWeatherUnits =
-            WebContentWeatherUnits::metricMsWind;
-    }
-
-    g_settings.webContentsItems.clear();
-    for (int i = 0;; i++) {
-        WebContentsSettings item;
-        item.url = StringSetting::make(L"WebContentsItems[%d].Url", i);
-        if (*item.url == '\0') {
-            break;
-        }
-
-        item.blockStart =
-            StringSetting::make(L"WebContentsItems[%d].BlockStart", i);
-        item.start = StringSetting::make(L"WebContentsItems[%d].Start", i);
-        item.end = StringSetting::make(L"WebContentsItems[%d].End", i);
-
-        item.contentMode = ContentMode::plainText;
-        StringSetting contentMode =
-            StringSetting::make(L"WebContentsItems[%d].ContentMode", i);
-        if (wcscmp(contentMode, L"xml") == 0) {
-            item.contentMode = ContentMode::xml;
-        } else if (wcscmp(contentMode, L"html") == 0) {
-            item.contentMode = ContentMode::html;
-        } else if (wcscmp(contentMode, L"xmlHtml") == 0) {
-            item.contentMode = ContentMode::xmlHtml;
-        }
-
-        for (int j = 0;; j++) {
-            StringSetting search = StringSetting::make(
-                L"WebContentsItems[%d].SearchReplace[%d].Search", i, j);
-            if (*search == '\0') {
-                break;
-            }
-
-            StringSetting replace = StringSetting::make(
-                L"WebContentsItems[%d].SearchReplace[%d].Replace", i, j);
-
-            try {
-                item.searchReplace.push_back(
-                    {std::wregex(search), std::wstring(replace)});
-            } catch (const std::exception& ex) {
-                Wh_Log(L"Invalid search pattern \"%s\": %hs", search.get(),
-                       ex.what());
-            }
-        }
-
-        item.maxLength = Wh_GetIntSetting(L"WebContentsItems[%d].MaxLength", i);
-
-        g_settings.webContentsItems.push_back(std::move(item));
-    }
-
-    g_settings.webContentsUpdateInterval =
-        Wh_GetIntSetting(L"WebContentsUpdateInterval");
-
     g_timeZoneInformation.clear();
     g_timeFormattedTz.clear();
     g_dateFormattedTz.clear();
@@ -5073,17 +4558,6 @@ void LoadSettings() {
 
     g_settings.oldTaskbarOnWin11 = Wh_GetIntSetting(L"oldTaskbarOnWin11");
 
-    // Kept for compatibility with old settings:
-    if (IsStrInDateTimePatternSettings(L"%web%") ||
-        IsStrInDateTimePatternSettings(L"%web_full%")) {
-        g_settings.webContentsUrl = StringSetting::make(L"WebContentsUrl");
-        g_settings.webContentsBlockStart =
-            StringSetting::make(L"WebContentsBlockStart");
-        g_settings.webContentsStart = StringSetting::make(L"WebContentsStart");
-        g_settings.webContentsEnd = StringSetting::make(L"WebContentsEnd");
-        g_settings.webContentsMaxLength =
-            Wh_GetIntSetting(L"WebContentsMaxLength");
-    }
 }
 
 HWND FindCurrentProcessTaskbarWnd() {
@@ -5403,7 +4877,6 @@ void Wh_ModUninit() {
 
     {
         std::lock_guard<std::mutex> guard(g_formatLineMutex);
-        WebContentUpdateThreadUninit();
         DataCollectionSessionUninit();
         MediaSessionUninit();
     }
@@ -5416,7 +4889,6 @@ BOOL Wh_ModSettingsChanged(BOOL* bReload) {
 
     {
         std::lock_guard<std::mutex> guard(g_formatLineMutex);
-        WebContentUpdateThreadUninit();
         DataCollectionSessionUninit();
         MediaSessionUninit();
         g_formattingInitialized = false;
