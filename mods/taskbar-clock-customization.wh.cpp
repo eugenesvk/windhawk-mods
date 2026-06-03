@@ -128,30 +128,25 @@ styles, such as the font color and size.
     H':'mm
   $name: Time format
   $description: >-
-    The format for the %time% pattern. Leave empty for the default format. For
-    syntax refer to the following page:
-
-    https://docs.microsoft.com/en-us/windows/win32/api/datetimeapi/nf-datetimeapi-gettimeformatex#remarks
+    %time% pattern. Empty=default. Syntax docs.microsoft.com/en-us/windows/win32/api/datetimeapi/nf-datetimeapi-gettimeformatex#remarks
 - DateFormat: >-
     d MMM
   $name: Date format
   $description: >-
-    The format for the %date% pattern. Leave empty for the default format. For
-    syntax refer to the following page:
-
-    https://docs.microsoft.com/en-us/windows/win32/intl/day--month--year--and-era-format-pictures
+    %date% pattern. Empty=default. Syntax https://docs.microsoft.com/en-us/windows/win32/intl/day--month--year--and-era-format-pictures
 - WeekdayFormat: custom
   $name: Week day format
-  $description: The format for the %weekday% pattern.
   $options:
   - dddd: Full day of the week
   - ddd: Abbreviated day of the week
   - custom: Custom, specified below
+  $description: >-
+    %weekday% pattern. custom=see WeekdayFormatCustom, otherwise syntax docs.microsoft.com/en-us/windows/win32/intl/day--month--year--and-era-format-pictures
 - WeekdayFormatCustom: U, M, T, W, R, F, S
   $name: Custom week day format
   $description: >-
-    A comma-separated list of custom week days, Sunday through Saturday. Used if
-    the custom format is specified for the week day format.
+    Used if the 'custom' format is specified for the week day format. ≝U, M, T, W, R, F, S
+    A comma-separated list of custom week days, Sunday through Saturday. Used if the custom format is specified for the week day format.
 - TopLine: '%weekday% %time%'
   $name: Top line
   $description: >-
